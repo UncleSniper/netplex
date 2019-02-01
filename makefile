@@ -24,4 +24,4 @@ $(BIN): $(OBJ)
 bin/%.o: src/%.c
 	echo compiling $<
 	$(MKDIR) bin
-	$(CC) -Wall -Wextra -Wno-long-long -c -O2 $< -o$@
+	$(CC) -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Wno-long-long -c -O2 $< -o$@

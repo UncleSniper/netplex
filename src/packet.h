@@ -16,45 +16,45 @@
 #define NPLX_EXEC_FL_ATTACH_STDOUT 02
 #define NPLX_EXEC_FL_ATTACH_STDERR 04
 
-typedef struct {
+typedef struct nplx_client_exec_packet {
 	char **argv;
 	uint16_t flags;
 } nplx_client_exec_packet_t;
 
-typedef struct {
+typedef struct nplx_client_connect_packet {
 	uint32_t host;
 	uint16_t port;
 } nplx_client_connect_packet_t;
 
-typedef struct {
+typedef struct nplx_client_disconnect_packet {
 	uint32_t socket;
 } nplx_client_disconnect_packet_t;
 
-typedef struct {
+typedef struct nplx_client_listen_packet {
 	uint32_t bind;
 	uint16_t port;
 } nplx_client_listen_packet_t;
 
-typedef struct {
+typedef struct nplx_client_send_packet {
 	char *path;
 	uint16_t flags;
 } nplx_client_send_packet_t;
 
-typedef struct {
+typedef struct nplx_client_recv_packet {
 	char *path;
 } nplx_client_recv_packet_t;
 
-typedef struct {
+typedef struct nplx_client_write_packet {
 	uint32_t stream;
 	uint16_t size;
 	char *data;
 } nplx_client_write_packet_t;
 
-typedef struct {
+typedef struct nplx_client_close_packet {
 	uint32_t stream;
 } nplx_client_close_packet_t;
 
-typedef struct {
+typedef struct nplx_client_packet {
 	nplx_client_opcode_t opcode;
 	union {
 		nplx_client_exec_packet_t exec;
@@ -68,54 +68,54 @@ typedef struct {
 	} packet;
 } nplx_client_packet_t;
 
-typedef struct {
+typedef struct nplx_server_failed_packet {
 	int32_t error_code;
 } nplx_server_failed_packet_t;
 
-typedef struct {
+typedef struct nplx_server_exec_ok_packet {
 	uint32_t process;
 	uint32_t in_stream;
 	uint32_t out_stream;
 	uint32_t err_stream;
 } nplx_server_exec_ok_packet_t;
 
-typedef struct {
+typedef struct nplx_server_connect_ok_packet {
 	uint32_t socket;
 	uint32_t in_stream;
 	uint32_t out_stream;
 } nplx_server_connect_ok_packet_t;
 
-typedef struct {
+typedef struct nplx_server_listen_ok_packet {
 	uint32_t socket;
 } nplx_server_listen_ok_packet_t;
 
-typedef struct {
+typedef struct nplx_server_send_ok_packet {
 	uint32_t stream;
 } nplx_server_send_ok_packet_t;
 
-typedef struct {
+typedef struct nplx_server_recv_ok_packet {
 	uint32_t stream;
 } nplx_server_recv_ok_packet_t;
 
-typedef struct {
+typedef struct nplx_server_read_data_packet {
 	uint32_t stream;
 	uint16_t size;
 	char *data;
 } nplx_server_read_data_packet_t;
 
-typedef struct {
+typedef struct nplx_server_exit_packet {
 	uint32_t process;
 	int16_t status;
 } nplx_server_exit_packet_t;
 
-typedef struct {
+typedef struct nplx_server_accept_client_packet {
 	uint32_t listen_socket;
 	uint32_t client_socket;
 	uint32_t in_stream;
 	uint32_t out_stream;
 } nplx_server_accept_client_packet_t;
 
-typedef struct {
+typedef struct nplx_server_packet {
 	nplx_server_opcode_t opcode;
 	union {
 		nplx_server_failed_packet_t failed;
@@ -130,7 +130,7 @@ typedef struct {
 	} packet;
 } nplx_server_packet_t;
 
-typedef struct {
+typedef struct nplx_client_packet_decoder {
 	nplx_client_packet_t *packet;
 	uint32_t top_bytes;
 	uint16_t string_count;
@@ -140,7 +140,7 @@ typedef struct {
 	char piece[4];
 } nplx_client_packet_decoder_t;
 
-typedef enum {
+typedef enum nplx_client_packet_decode_result {
 	NPLX_CLI_PKT_DEC_RSLT_MORE,
 	NPLX_CLI_PKT_DEC_RSLT_DONE,
 	NPLX_CLI_PKT_DEC_RSLT_FAILED

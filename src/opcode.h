@@ -1,7 +1,7 @@
 #ifndef NETPLEX_OPCODE_H
 #define NETPLEX_OPCODE_H
 
-typedef enum {
+typedef enum nplx_client_opcode {
 	NPLX_CLI_OPC_PING,
 	NPLX_CLI_OPC_EXEC,
 	NPLX_CLI_OPC_CONNECT,
@@ -13,7 +13,7 @@ typedef enum {
 	NPLX_CLI_OPC_CLOSE
 } nplx_client_opcode_t;
 
-typedef enum {
+typedef enum nplx_server_opcode {
 	NPLX_SVR_OPC_PONG,
 	NPLX_SVR_OPC_EXEC_OK,
 	NPLX_SVR_OPC_EXEC_FAILED,
