@@ -114,7 +114,7 @@ void nplx_socket_input_stream_init(
 	stream->fd_input_stream.fd = fd;
 	stream->socket = socket;
 	if(socket)
-		socket->input_stream = (nplx_input_stream_t*)stream;
+		socket->input_stream = stream;
 }
 
 int nplx_socket_input_stream_close(
@@ -153,7 +153,7 @@ void nplx_socket_output_stream_init(
 	stream->fd_output_stream.fd = fd;
 	stream->socket = socket;
 	if(socket)
-		socket->output_stream = (nplx_output_stream_t*)stream;
+		socket->output_stream = stream;
 }
 
 int nplx_socket_output_stream_close(
