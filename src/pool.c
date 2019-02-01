@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <inttypes.h>
 
+#include "api.h"
 #include "pool.h"
 
 void nplx_pool_init(
@@ -136,4 +137,10 @@ int nplx_pool_get(
 		return EDOM;
 	*destination = chunk->elements[exponent];
 	return 0;
+}
+
+void nplx_null_poolable_destroy(
+	NETPLEX_UNUSED(nplx_poolable_t*, poolable)
+) {
+	/* nothing to do */
 }

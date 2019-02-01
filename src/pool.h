@@ -58,4 +58,8 @@ int nplx_pool_get(
 	nplx_poolable_t **destination
 );
 
+void nplx_null_poolable_destroy(
+	nplx_poolable_t *poolable
+);
+
 #endif /* NETPLEX_POOL_H */
