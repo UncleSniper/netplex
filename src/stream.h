@@ -87,6 +87,20 @@ typedef struct nplx_socket_output_stream {
 	struct nplx_socket *socket;
 } nplx_socket_output_stream_t;
 
+/* process_*_stream */
+
+struct nplx_process;
+
+typedef struct nplx_process_input_stream {
+	nplx_fd_input_stream_t fd_input_stream;
+	struct nplx_process *process;
+} nplx_process_input_stream_t;
+
+typedef struct nplx_process_output_stream {
+	nplx_fd_output_stream_t fd_output_stream;
+	struct nplx_process *process;
+} nplx_process_output_stream_t;
+
 /* dispatch */
 
 inline int nplx_stream_close(
@@ -179,6 +193,42 @@ int nplx_socket_output_stream_close(
 
 void nplx_socket_output_stream_destroy(
 	nplx_socket_output_stream_t *stream
+);
+
+/* process_stdin_stream */
+
+void nplx_process_stdin_stream_init(
+	nplx_process_output_stream_t *stream,
+	int fd,
+	struct nplx_process *process
+);
+
+void nplx_process_stdin_stream_destroy(
+	nplx_process_output_stream_t *stream
+);
+
+/* process_stdout_stream */
+
+void nplx_process_stdout_stream_init(
+	nplx_process_input_stream_t *stream,
+	int fd,
+	struct nplx_process *process
+);
+
+void nplx_process_stdout_stream_destroy(
+	nplx_process_input_stream_t *stream
+);
+
+/* process_stderr_stream */
+
+void nplx_process_stderr_stream_init(
+	nplx_process_input_stream_t *stream,
+	int fd,
+	struct nplx_process *process
+);
+
+void nplx_process_stderr_stream_destroy(
+	nplx_process_input_stream_t *stream
 );
 
 #endif /* NETPLEX_STREAM_H */

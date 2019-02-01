@@ -4,6 +4,7 @@
 
 #include "stream.h"
 #include "socket.h"
+#include "process.h"
 
 /* fd_*_stream */
 
@@ -98,7 +99,7 @@ int nplx_file_output_stream_close(
 static const nplx_input_stream_vtable_t socket_input_stream_vtable = {
 	.stream = {
 		.poolable = {
-			.destroy = nplx_null_poolable_destroy
+			.destroy = (nplx_poolable_destroy_cb)nplx_socket_input_stream_destroy
 		},
 		.close = (nplx_stream_close_cb)nplx_socket_input_stream_close
 	},
@@ -137,7 +138,7 @@ void nplx_socket_input_stream_destroy(
 static const nplx_output_stream_vtable_t socket_output_stream_vtable = {
 	.stream = {
 		.poolable = {
-			.destroy = nplx_null_poolable_destroy
+			.destroy = (nplx_poolable_destroy_cb)nplx_socket_output_stream_destroy
 		},
 		.close = (nplx_stream_close_cb)nplx_socket_output_stream_close
 	},
@@ -169,4 +170,97 @@ void nplx_socket_output_stream_destroy(
 ) {
 	if(stream->socket)
 		stream->socket->output_stream = NULL;
+}
+
+/* process_stdin_stream */
+
+static const nplx_output_stream_vtable_t process_stdin_stream_vtable = {
+	.stream = {
+		.poolable = {
+			.destroy = (nplx_poolable_destroy_cb)nplx_process_stdin_stream_destroy
+		},
+		.close = (nplx_stream_close_cb)nplx_file_output_stream_close
+	},
+	.write = (nplx_output_stream_write_cb)nplx_fd_output_stream_write
+};
+
+void nplx_process_stdin_stream_init(
+	nplx_process_output_stream_t *stream,
+	int fd,
+	nplx_process_t *process
+) {
+	stream->fd_output_stream.output_stream.vtable = &process_stdin_stream_vtable;
+	stream->fd_output_stream.fd = fd;
+	stream->process = process;
+	if(process)
+		process->to_stdin = stream;
+}
+
+void nplx_process_stdin_stream_destroy(
+	nplx_process_output_stream_t *stream
+) {
+	if(stream->process)
+		stream->process->to_stdin = NULL;
+}
+
+/* process_stdout_stream */
+
+static const nplx_input_stream_vtable_t process_stdout_stream_vtable = {
+	.stream = {
+		.poolable = {
+			.destroy = (nplx_poolable_destroy_cb)nplx_process_stdout_stream_destroy
+		},
+		.close = (nplx_stream_close_cb)nplx_file_input_stream_close
+	},
+	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read
+};
+
+void nplx_process_stdout_stream_init(
+	nplx_process_input_stream_t *stream,
+	int fd,
+	nplx_process_t *process
+) {
+	stream->fd_input_stream.input_stream.vtable = &process_stdout_stream_vtable;
+	stream->fd_input_stream.fd = fd;
+	stream->process = process;
+	if(process)
+		process->from_stdout = stream;
+}
+
+void nplx_process_stdout_stream_destroy(
+	nplx_process_input_stream_t *stream
+) {
+	if(stream->process)
+		stream->process->from_stdout = NULL;
+}
+
+/* process_stderr_stream */
+
+static const nplx_input_stream_vtable_t process_stderr_stream_vtable = {
+	.stream = {
+		.poolable = {
+			.destroy = (nplx_poolable_destroy_cb)nplx_process_stderr_stream_destroy
+		},
+		.close = (nplx_stream_close_cb)nplx_file_input_stream_close
+	},
+	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read
+};
+
+void nplx_process_stderr_stream_init(
+	nplx_process_input_stream_t *stream,
+	int fd,
+	nplx_process_t *process
+) {
+	stream->fd_input_stream.input_stream.vtable = &process_stderr_stream_vtable;
+	stream->fd_input_stream.fd = fd;
+	stream->process = process;
+	if(process)
+		process->from_stderr = stream;
+}
+
+void nplx_process_stderr_stream_destroy(
+	nplx_process_input_stream_t *stream
+) {
+	if(stream->process)
+		stream->process->from_stderr = NULL;
 }
