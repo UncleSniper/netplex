@@ -62,4 +62,10 @@ void nplx_null_poolable_destroy(
 	nplx_poolable_t *poolable
 );
 
+inline void nplx_poolable_destroy(
+	nplx_poolable_t *poolable
+) {
+	poolable->vtable->destroy(poolable);
+}
+
 #endif /* NETPLEX_POOL_H */

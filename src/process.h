@@ -7,6 +7,7 @@
 #include "stream.h"
 
 typedef struct nplx_process {
+	nplx_poolable_t poolable;
 	pid_t pid;
 	nplx_process_output_stream_t *to_stdin;
 	nplx_process_input_stream_t *from_stdout;
@@ -24,6 +25,10 @@ int nplx_process_deep_init(
 	int stdin_fd,
 	int stdout_fd,
 	int stderr_fd
+);
+
+void nplx_process_destroy(
+	nplx_process_t *process
 );
 
 #endif /* NETPLEX_PROCESS_H */

@@ -4,10 +4,15 @@
 
 #include "process.h"
 
+static const nplx_poolable_vtable_t process_vtable = {
+	.destroy = (nplx_poolable_destroy_cb)nplx_process_destroy
+};
+
 void nplx_process_init(
 	nplx_process_t *process,
 	pid_t pid
 ) {
+	process->poolable.vtable = &process_vtable;
 	process->pid = pid;
 	process->to_stdin = NULL;
 	process->from_stdout = NULL;
@@ -52,6 +57,7 @@ int nplx_process_deep_init(
 			return ENOMEM;
 		}
 	}
+	process->poolable.vtable = &process_vtable;
 	process->pid = pid;
 	if(to_stdin)
 		nplx_process_stdin_stream_init(to_stdin, stdin_fd, process);
@@ -66,4 +72,21 @@ int nplx_process_deep_init(
 	else
 		process->from_stderr = NULL;
 	return 0;
+}
+
+void nplx_process_destroy(
+	nplx_process_t *process
+) {
+	if(process->to_stdin) {
+		nplx_poolable_destroy((nplx_poolable_t*)process->to_stdin);
+		free(process->to_stdin);
+	}
+	if(process->from_stdout) {
+		nplx_poolable_destroy((nplx_poolable_t*)process->from_stdout);
+		free(process->from_stdout);
+	}
+	if(process->from_stderr) {
+		nplx_poolable_destroy((nplx_poolable_t*)process->from_stderr);
+		free(process->from_stderr);
+	}
 }
