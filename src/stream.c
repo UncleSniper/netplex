@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 
 #include "stream.h"
+#include "socket.h"
 
 /* fd_*_stream */
 
@@ -105,19 +106,30 @@ static const nplx_input_stream_vtable_t socket_input_stream_vtable = {
 };
 
 void nplx_socket_input_stream_init(
-	nplx_fd_input_stream_t *stream,
-	int fd
+	nplx_socket_input_stream_t *stream,
+	int fd,
+	nplx_socket_t *socket
 ) {
-	stream->input_stream.vtable = &socket_input_stream_vtable;
-	stream->fd = fd;
+	stream->fd_input_stream.input_stream.vtable = &socket_input_stream_vtable;
+	stream->fd_input_stream.fd = fd;
+	stream->socket = socket;
+	if(socket)
+		socket->input_stream = (nplx_input_stream_t*)stream;
 }
 
 int nplx_socket_input_stream_close(
-	nplx_fd_input_stream_t *stream
+	nplx_socket_input_stream_t *stream
 ) {
-	if(shutdown(stream->fd, SHUT_RD))
+	if(shutdown(stream->fd_input_stream.fd, SHUT_RD))
 		return errno;
 	return 0;
+}
+
+void nplx_socket_input_stream_destroy(
+	nplx_socket_input_stream_t *stream
+) {
+	if(stream->socket)
+		stream->socket->input_stream = NULL;
 }
 
 /* socket_output_stream */
@@ -133,17 +145,28 @@ static const nplx_output_stream_vtable_t socket_output_stream_vtable = {
 };
 
 void nplx_socket_output_stream_init(
-	nplx_fd_output_stream_t *stream,
-	int fd
+	nplx_socket_output_stream_t *stream,
+	int fd,
+	nplx_socket_t *socket
 ) {
-	stream->output_stream.vtable = &socket_output_stream_vtable;
-	stream->fd = fd;
+	stream->fd_output_stream.output_stream.vtable = &socket_output_stream_vtable;
+	stream->fd_output_stream.fd = fd;
+	stream->socket = socket;
+	if(socket)
+		socket->output_stream = (nplx_output_stream_t*)stream;
 }
 
 int nplx_socket_output_stream_close(
-	nplx_fd_output_stream_t *stream
+	nplx_socket_output_stream_t *stream
 ) {
-	if(shutdown(stream->fd, SHUT_WR))
+	if(shutdown(stream->fd_output_stream.fd, SHUT_WR))
 		return errno;
 	return 0;
+}
+
+void nplx_socket_output_stream_destroy(
+	nplx_socket_output_stream_t *stream
+) {
+	if(stream->socket)
+		stream->socket->output_stream = NULL;
 }
