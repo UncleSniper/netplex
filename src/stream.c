@@ -1,4 +1,3 @@
-#define _DEFAULT_SOURCE
 #include <errno.h>
 #include <sys/socket.h>
 
@@ -45,6 +44,7 @@ static const nplx_input_stream_vtable_t file_input_stream_vtable = {
 		.poolable = {
 			.destroy = nplx_null_poolable_destroy
 		},
+		.direction = NPLX_INPUT_STREAM,
 		.close = (nplx_stream_close_cb)nplx_file_input_stream_close
 	},
 	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read
@@ -73,6 +73,7 @@ static const nplx_output_stream_vtable_t file_output_stream_vtable = {
 		.poolable = {
 			.destroy = nplx_null_poolable_destroy
 		},
+		.direction = NPLX_OUTPUT_STREAM,
 		.close = (nplx_stream_close_cb)nplx_file_output_stream_close
 	},
 	.write = (nplx_output_stream_write_cb)nplx_fd_output_stream_write
@@ -101,6 +102,7 @@ static const nplx_input_stream_vtable_t socket_input_stream_vtable = {
 		.poolable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_socket_input_stream_destroy
 		},
+		.direction = NPLX_INPUT_STREAM,
 		.close = (nplx_stream_close_cb)nplx_socket_input_stream_close
 	},
 	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read
@@ -140,6 +142,7 @@ static const nplx_output_stream_vtable_t socket_output_stream_vtable = {
 		.poolable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_socket_output_stream_destroy
 		},
+		.direction = NPLX_OUTPUT_STREAM,
 		.close = (nplx_stream_close_cb)nplx_socket_output_stream_close
 	},
 	.write = (nplx_output_stream_write_cb)nplx_fd_output_stream_write
@@ -179,6 +182,7 @@ static const nplx_output_stream_vtable_t process_stdin_stream_vtable = {
 		.poolable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_process_stdin_stream_destroy
 		},
+		.direction = NPLX_OUTPUT_STREAM,
 		.close = (nplx_stream_close_cb)nplx_file_output_stream_close
 	},
 	.write = (nplx_output_stream_write_cb)nplx_fd_output_stream_write
@@ -210,6 +214,7 @@ static const nplx_input_stream_vtable_t process_stdout_stream_vtable = {
 		.poolable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_process_stdout_stream_destroy
 		},
+		.direction = NPLX_INPUT_STREAM,
 		.close = (nplx_stream_close_cb)nplx_file_input_stream_close
 	},
 	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read
@@ -241,6 +246,7 @@ static const nplx_input_stream_vtable_t process_stderr_stream_vtable = {
 		.poolable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_process_stderr_stream_destroy
 		},
+		.direction = NPLX_INPUT_STREAM,
 		.close = (nplx_stream_close_cb)nplx_file_input_stream_close
 	},
 	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read

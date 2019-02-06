@@ -1,4 +1,3 @@
-#define _DEFAULT_SOURCE
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,15 +83,14 @@ int nplx_server_packet_encode(
 			break;
 #undef fixed
 		default:
-			errno = 0;
-			return -1;
+			return EINVAL;
 	}
 	if(reuse_buffer && reuse_size >= *size)
 		*data = reuse_buffer;
 	else {
 		*data = (char*)malloc((size_t)*size);
 		if(!*data)
-			return -1;
+			return ENOMEM;
 	}
 	**data = (char)(unsigned char)(unsigned)packet->opcode;
 	switch(packet->opcode) {
@@ -133,8 +131,7 @@ int nplx_server_packet_encode(
 			/* Of course this would be a classic case of 'programmer fsck(8)ed up' at this point... */
 			if(*data != reuse_buffer)
 				free(*data);
-			errno = 0;
-			return -1;
+			return EFAULT;
 	}
 	return 0;
 }
@@ -268,7 +265,7 @@ int nplx_client_packet_decoder_init(
 	if(!reuse_packet) {
 		decoder->packet = (nplx_client_packet_t*)malloc(sizeof(nplx_client_packet_t));
 		if(!decoder->packet)
-			return -1;
+			return ENOMEM;
 	}
 	decoder->top_bytes = (uint32_t)0u;
 	decoder->string_done = (uint32_t)0u;

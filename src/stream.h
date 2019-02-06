@@ -7,6 +7,11 @@
 
 /* stream */
 
+typedef enum nplx_stream_direction {
+	NPLX_INPUT_STREAM,
+	NPLX_OUTPUT_STREAM
+} nplx_stream_direction_t;
+
 struct nplx_stream;
 
 typedef int (*nplx_stream_close_cb)(
@@ -15,6 +20,7 @@ typedef int (*nplx_stream_close_cb)(
 
 typedef struct nplx_stream_vtable {
 	nplx_poolable_vtable_t poolable;
+	nplx_stream_direction_t direction;
 	nplx_stream_close_cb close;
 } nplx_stream_vtable_t;
 
