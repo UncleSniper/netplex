@@ -16,6 +16,8 @@
 #define NPLX_EXEC_FL_ATTACH_STDOUT 02
 #define NPLX_EXEC_FL_ATTACH_STDERR 04
 
+#define NPLX_SERVER_PACKET_MAX_SIZE 17
+
 typedef struct nplx_client_exec_packet {
 	char **argv;
 	uint16_t flags;
@@ -222,6 +224,12 @@ void nplx_client_packet_decoder_destroy(
 	nplx_client_packet_decoder_t *decoder,
 	int retain_packet
 );
+
+inline int nplx_client_packet_decoder_is_clean(
+	const nplx_client_packet_decoder_t *decoder
+) {
+	return !decoder->top_bytes;
+}
 
 nplx_client_packet_decode_result_t nplx_client_packet_decode(
 	nplx_client_packet_decoder_t *decoder,

@@ -78,20 +78,20 @@ int nplx_fd_hashtable_erase(
 	return ENOENT;
 }
 
-int nplx_fd_hashtable_dispatch(
+nplx_error_pump_result_t nplx_fd_hashtable_dispatch(
 	const nplx_fd_hashtable_t *table,
 	int fd,
 	struct nplx_driver *driver,
-	int *error_code
+	nplx_error_t *error
 ) {
 	uint32_t hash;
 	nplx_fd_hashtable_node_t *node;
 	hash = (uint32_t)((uint32_t)fd % table->modulus);
 	for(node = table->table[hash]; node; node = node->next) {
-		if(node->fd == fd) {
-			*error_code = node->handler(fd, node->id, driver);
-			return 0;
-		}
+		if(node->fd == fd)
+			return node->handler(fd, node->id, driver, error);
 	}
-	return ENOENT;
+	error->type = NPLX_ERR_FD_DISPATCH;
+	error->error_code = EBADF;
+	return NPLX_DRVR_PUMP_FATAL_ERROR;
 }

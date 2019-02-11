@@ -3,12 +3,15 @@
 
 #include <stdint.h>
 
+#include "error.h"
+
 struct nplx_driver;
 
-typedef int (*nplx_fd_activity_handler_cb)(
+typedef nplx_error_pump_result_t (*nplx_fd_activity_handler_cb)(
 	int fd,
 	uint32_t id,
-	struct nplx_driver *driver
+	struct nplx_driver *driver,
+	nplx_error_t *error
 );
 
 typedef struct nplx_fd_hashtable_node {
@@ -44,11 +47,11 @@ int nplx_fd_hashtable_erase(
 	int fd
 );
 
-int nplx_fd_hashtable_dispatch(
+nplx_error_pump_result_t nplx_fd_hashtable_dispatch(
 	const nplx_fd_hashtable_t *table,
 	int fd,
 	struct nplx_driver *driver,
-	int *error_code
+	nplx_error_t *error
 );
 
 #endif /* NETPLEX_HASHTABLE_H */
