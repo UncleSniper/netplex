@@ -25,6 +25,7 @@ void nplx_pool_destroy(
 			if(chunk->occupied_bitmap & (uint32_t)((uint32_t)1u << element_index)) {
 				element = chunk->elements[element_index];
 				element->vtable->destroy(element);
+				free(element);
 			}
 		}
 		free(chunk);
@@ -93,7 +94,8 @@ int nplx_pool_alloc(
 
 int nplx_pool_free(
 	nplx_pool_t *pool,
-	uint32_t id
+	uint32_t id,
+	int destroy
 ) {
 	uint32_t chunk_index, mask;
 	unsigned exponent;
@@ -107,8 +109,13 @@ int nplx_pool_free(
 	mask = (uint32_t)((uint32_t)1u << exponent);
 	if(!(uint32_t)(chunk->occupied_bitmap & mask))
 		return EDOM;
-	poolable = chunk->elements[exponent];
-	poolable->vtable->destroy(poolable);
+	if(destroy & NPLX_POOL_FREE_DELETE) {
+		poolable = chunk->elements[exponent];
+		if(destroy & NPLX_POOL_FREE_DESTROY)
+			poolable->vtable->destroy(poolable);
+		if(destroy & NPLX_POOL_FREE_FREE)
+			free(poolable);
+	}
 	if(!(uint32_t)~chunk->occupied_bitmap) {
 		chunk->next_free = pool->first_free;
 		pool->first_free = chunk;

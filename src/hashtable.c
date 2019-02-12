@@ -9,22 +9,24 @@ int nplx_fd_hashtable_init(
 	uint32_t modulus
 ) {
 	size_t tblsize;
-	tblsize = (size_t)((size_t)modulus * sizeof(nplx_fd_hashtable_node_t*));
-	table->table = (nplx_fd_hashtable_node_t**)malloc(tblsize);
+	tblsize = (size_t)((size_t)modulus * sizeof(nplx_fd_hashtable_line_t));
+	table->table = (nplx_fd_hashtable_line_t*)malloc(tblsize);
 	if(!table->table)
 		return ENOMEM;
 	memset(table->table, 0, tblsize);
 	table->modulus = modulus;
+	table->size = (uint32_t)0u;
+	table->first_line = NULL;
 	return 0;
 }
 
 void nplx_fd_hashtable_destroy(
 	nplx_fd_hashtable_t *table
 ) {
-	uint32_t u;
+	nplx_fd_hashtable_line_t *line;
 	nplx_fd_hashtable_node_t *node, *next;
-	for(u = (uint32_t)0u; u < table->modulus; ++u) {
-		for(node = table->table[u]; node; node = next) {
+	for(line = table->first_line; line; line = line->next_line) {
+		for(node = line->first_node; node; node = next) {
 			next = node->next;
 			free(node);
 		}
@@ -39,9 +41,11 @@ int nplx_fd_hashtable_put(
 	nplx_fd_activity_handler_cb handler
 ) {
 	uint32_t hash;
+	nplx_fd_hashtable_line_t *line;
 	nplx_fd_hashtable_node_t *node;
 	hash = (uint32_t)((uint32_t)fd % table->modulus);
-	for(node = table->table[hash]; node; node = node->next) {
+	line = table->table + hash;
+	for(node = line->first_node; node; node = node->next) {
 		if(node->fd == fd) {
 			node->id = id;
 			node->handler = handler;
@@ -54,8 +58,16 @@ int nplx_fd_hashtable_put(
 	node->fd = fd;
 	node->id = id;
 	node->handler = handler;
-	node->next = table->table[hash];
-	table->table[hash] = node;
+	if(!line->first_node) {
+		line->prev_line = NULL;
+		line->next_line = table->first_line;
+		if(line->next_line)
+			line->next_line->prev_line = line;
+		table->first_line = line;
+	}
+	node->next = line->first_node;
+	line->first_node = node;
+	++table->size;
 	return 0;
 }
 
@@ -64,13 +76,24 @@ int nplx_fd_hashtable_erase(
 	int fd
 ) {
 	uint32_t hash;
+	nplx_fd_hashtable_line_t *line;
 	nplx_fd_hashtable_node_t *node, **prev;
 	hash = (uint32_t)((uint32_t)fd % table->modulus);
-	prev = table->table + hash;
+	line = table->table + hash;
+	prev = &line->first_node;
 	for(node = *prev; node; node = *prev) {
 		if(node->fd == fd) {
 			*prev = node->next;
 			free(node);
+			if(!line->first_node) {
+				if(line->prev_line)
+					line->prev_line->next_line = line->next_line;
+				else
+					table->first_line = line->next_line;
+				if(line->next_line)
+					line->next_line->prev_line = line->prev_line;
+			}
+			--table->size;
 			return 0;
 		}
 		prev = &node->next;
@@ -87,7 +110,7 @@ nplx_error_pump_result_t nplx_fd_hashtable_dispatch(
 	uint32_t hash;
 	nplx_fd_hashtable_node_t *node;
 	hash = (uint32_t)((uint32_t)fd % table->modulus);
-	for(node = table->table[hash]; node; node = node->next) {
+	for(node = table->table[hash].first_node; node; node = node->next) {
 		if(node->fd == fd)
 			return node->handler(fd, node->id, driver, error);
 	}

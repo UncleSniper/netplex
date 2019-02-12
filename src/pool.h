@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define NPLX_POOL_FREE_KEEP    00
+#define NPLX_POOL_FREE_DESTROY 01
+#define NPLX_POOL_FREE_FREE    02
+#define NPLX_POOL_FREE_DELETE  03
+
 struct nplx_poolable;
 
 typedef void (*nplx_poolable_destroy_cb)(
@@ -49,7 +54,8 @@ int nplx_pool_alloc(
 
 int nplx_pool_free(
 	nplx_pool_t *pool,
-	uint32_t id
+	uint32_t id,
+	int destroy
 );
 
 int nplx_pool_get(

@@ -14,12 +14,22 @@ typedef enum nplx_error_type {
 	NPLX_ERR_INCOMPLETE_CLIENT_PACKET,
 	NPLX_ERR_INVALID_CLIENT_PACKET,
 	NPLX_ERR_CANNOT_ENCODE_SERVER_PACKET,
-	NPLX_ERR_WRITE_STDOUT
+	NPLX_ERR_WRITE_STDOUT,
+	NPLX_ERR_ACTIVITY_ON_UNKNOWN_STREAM,
+	NPLX_ERR_READING_OUTPUT_STREAM,
+	NPLX_ERR_CLOSE_STREAM
 } nplx_error_type_t;
+
+typedef struct nplx_error_poolable {
+	uint32_t id;
+} nplx_error_poolable_t;
 
 typedef struct nplx_error {
 	nplx_error_type_t type;
 	int error_code;
+	union {
+		nplx_error_poolable_t poolable;
+	} details;
 } nplx_error_t;
 
 #endif /* NETPLEX_ERROR_H */

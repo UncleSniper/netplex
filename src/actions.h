@@ -14,4 +14,10 @@ nplx_error_pump_result_t nplx_perform_ping(
 	nplx_error_t *error
 );
 
+nplx_error_pump_result_t nplx_perform_connect(
+	nplx_driver_t *driver,
+	const nplx_client_connect_packet_t *spec,
+	nplx_error_t *error
+);
+
 #endif /* NETPLEX_ACTIONS_H */

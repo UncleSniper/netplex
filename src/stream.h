@@ -5,6 +5,8 @@
 
 #include "pool.h"
 
+struct nplx_driver;
+
 /* stream */
 
 typedef enum nplx_stream_direction {
@@ -18,10 +20,16 @@ typedef int (*nplx_stream_close_cb)(
 	struct nplx_stream *stream
 );
 
+typedef void (*nplx_stream_remove_state_cb)(
+	struct nplx_stream *stream,
+	struct nplx_driver *driver
+);
+
 typedef struct nplx_stream_vtable {
 	nplx_poolable_vtable_t poolable;
 	nplx_stream_direction_t direction;
 	nplx_stream_close_cb close;
+	nplx_stream_remove_state_cb remove_state;
 } nplx_stream_vtable_t;
 
 typedef struct nplx_stream {
@@ -115,6 +123,13 @@ inline int nplx_stream_close(
 	return stream->vtable->close(stream);
 }
 
+inline void nplx_stream_remove_state(
+	nplx_stream_t *stream,
+	struct nplx_driver *driver
+) {
+	stream->vtable->remove_state(stream, driver);
+}
+
 inline int nplx_input_stream_read(
 	nplx_input_stream_t *stream,
 	char *buffer,
@@ -145,6 +160,16 @@ int nplx_fd_output_stream_write(
 	nplx_fd_output_stream_t *stream,
 	const char *buffer,
 	size_t size
+);
+
+void nplx_fd_input_stream_remove_state(
+	nplx_fd_input_stream_t *stream,
+	struct nplx_driver *driver
+);
+
+void nplx_fd_output_stream_remove_state(
+	nplx_fd_output_stream_t *stream,
+	struct nplx_driver *driver
 );
 
 /* file_input_stream */

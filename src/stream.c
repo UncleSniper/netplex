@@ -4,6 +4,7 @@
 #include "stream.h"
 #include "socket.h"
 #include "process.h"
+#include "driver.h"
 
 /* fd_*_stream */
 
@@ -37,6 +38,22 @@ int nplx_fd_output_stream_write(
 	return 0;
 }
 
+void nplx_fd_input_stream_remove_state(
+	nplx_fd_input_stream_t *stream,
+	nplx_driver_t *driver
+) {
+	nplx_fd_hashtable_erase(&driver->select_fds, stream->fd);
+	nplx_driver_rebuild_poll_set(driver);
+}
+
+void nplx_fd_output_stream_remove_state(
+	nplx_fd_output_stream_t *stream,
+	nplx_driver_t *driver
+) {
+	nplx_fd_hashtable_erase(&driver->select_fds, stream->fd);
+	nplx_driver_rebuild_poll_set(driver);
+}
+
 /* file_input_stream */
 
 static const nplx_input_stream_vtable_t file_input_stream_vtable = {
@@ -45,7 +62,8 @@ static const nplx_input_stream_vtable_t file_input_stream_vtable = {
 			.destroy = nplx_null_poolable_destroy
 		},
 		.direction = NPLX_INPUT_STREAM,
-		.close = (nplx_stream_close_cb)nplx_file_input_stream_close
+		.close = (nplx_stream_close_cb)nplx_file_input_stream_close,
+		.remove_state = (nplx_stream_remove_state_cb)nplx_fd_input_stream_remove_state
 	},
 	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read
 };
@@ -74,7 +92,8 @@ static const nplx_output_stream_vtable_t file_output_stream_vtable = {
 			.destroy = nplx_null_poolable_destroy
 		},
 		.direction = NPLX_OUTPUT_STREAM,
-		.close = (nplx_stream_close_cb)nplx_file_output_stream_close
+		.close = (nplx_stream_close_cb)nplx_file_output_stream_close,
+		.remove_state = (nplx_stream_remove_state_cb)nplx_fd_output_stream_remove_state
 	},
 	.write = (nplx_output_stream_write_cb)nplx_fd_output_stream_write
 };
@@ -103,7 +122,8 @@ static const nplx_input_stream_vtable_t socket_input_stream_vtable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_socket_input_stream_destroy
 		},
 		.direction = NPLX_INPUT_STREAM,
-		.close = (nplx_stream_close_cb)nplx_socket_input_stream_close
+		.close = (nplx_stream_close_cb)nplx_socket_input_stream_close,
+		.remove_state = (nplx_stream_remove_state_cb)nplx_fd_input_stream_remove_state
 	},
 	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read
 };
@@ -143,7 +163,8 @@ static const nplx_output_stream_vtable_t socket_output_stream_vtable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_socket_output_stream_destroy
 		},
 		.direction = NPLX_OUTPUT_STREAM,
-		.close = (nplx_stream_close_cb)nplx_socket_output_stream_close
+		.close = (nplx_stream_close_cb)nplx_socket_output_stream_close,
+		.remove_state = (nplx_stream_remove_state_cb)nplx_fd_output_stream_remove_state
 	},
 	.write = (nplx_output_stream_write_cb)nplx_fd_output_stream_write
 };
@@ -183,7 +204,8 @@ static const nplx_output_stream_vtable_t process_stdin_stream_vtable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_process_stdin_stream_destroy
 		},
 		.direction = NPLX_OUTPUT_STREAM,
-		.close = (nplx_stream_close_cb)nplx_file_output_stream_close
+		.close = (nplx_stream_close_cb)nplx_file_output_stream_close,
+		.remove_state = (nplx_stream_remove_state_cb)nplx_fd_output_stream_remove_state
 	},
 	.write = (nplx_output_stream_write_cb)nplx_fd_output_stream_write
 };
@@ -215,7 +237,8 @@ static const nplx_input_stream_vtable_t process_stdout_stream_vtable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_process_stdout_stream_destroy
 		},
 		.direction = NPLX_INPUT_STREAM,
-		.close = (nplx_stream_close_cb)nplx_file_input_stream_close
+		.close = (nplx_stream_close_cb)nplx_file_input_stream_close,
+		.remove_state = (nplx_stream_remove_state_cb)nplx_fd_input_stream_remove_state
 	},
 	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read
 };
@@ -247,7 +270,8 @@ static const nplx_input_stream_vtable_t process_stderr_stream_vtable = {
 			.destroy = (nplx_poolable_destroy_cb)nplx_process_stderr_stream_destroy
 		},
 		.direction = NPLX_INPUT_STREAM,
-		.close = (nplx_stream_close_cb)nplx_file_input_stream_close
+		.close = (nplx_stream_close_cb)nplx_file_input_stream_close,
+		.remove_state = (nplx_stream_remove_state_cb)nplx_fd_input_stream_remove_state
 	},
 	.read = (nplx_input_stream_read_cb)nplx_fd_input_stream_read
 };

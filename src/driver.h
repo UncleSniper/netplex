@@ -50,4 +50,15 @@ nplx_error_pump_result_t nplx_driver_dispatch_client_packet(
 	nplx_error_t *error
 );
 
+nplx_error_pump_result_t nplx_driver_handle_stream_read(
+	int fd,
+	uint32_t id,
+	nplx_driver_t *driver,
+	nplx_error_t *error
+);
+
+int nplx_driver_rebuild_poll_set(
+	nplx_driver_t *driver
+);
+
 #endif /* NETPLEX_DRIVER_H */
